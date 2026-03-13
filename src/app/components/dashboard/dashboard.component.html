@@ -1,0 +1,207 @@
+<div class="dashboard">
+  <div class="page-header">
+    <h1>Marketing Dashboard</h1>
+    <div class="page-header-actions">
+      <button igxButton="raised" igxRipple (click)="navigateToCreate()">
+        <igx-icon>add</igx-icon>
+        Create Content
+      </button>
+    </div>
+  </div>
+
+  <!-- Global KPI row -->
+  <section class="kpi-row" aria-label="Key performance indicators">
+    <igx-card class="kpi-card">
+      <igx-card-content>
+        <div class="kpi-icon published-kpi" aria-hidden="true">
+          <igx-icon>check_circle</igx-icon>
+        </div>
+        <div class="kpi-info">
+          <p class="kpi-value">{{ totalPublished() }}</p>
+          <p class="kpi-label">Published</p>
+        </div>
+      </igx-card-content>
+    </igx-card>
+    <igx-card class="kpi-card">
+      <igx-card-content>
+        <div class="kpi-icon scheduled-kpi" aria-hidden="true">
+          <igx-icon>schedule</igx-icon>
+        </div>
+        <div class="kpi-info">
+          <p class="kpi-value">{{ totalScheduled() }}</p>
+          <p class="kpi-label">Scheduled</p>
+        </div>
+      </igx-card-content>
+    </igx-card>
+    <igx-card class="kpi-card">
+      <igx-card-content>
+        <div class="kpi-icon pipeline-kpi" aria-hidden="true">
+          <igx-icon>pending_actions</igx-icon>
+        </div>
+        <div class="kpi-info">
+          <p class="kpi-value">{{ totalPipeline() }}</p>
+          <p class="kpi-label">In Pipeline</p>
+        </div>
+      </igx-card-content>
+    </igx-card>
+    <igx-card class="kpi-card">
+      <igx-card-content>
+        <div class="kpi-icon impressions-kpi" aria-hidden="true">
+          <igx-icon>visibility</igx-icon>
+        </div>
+        <div class="kpi-info">
+          <p class="kpi-value">{{ formatImpressions(totalImpressions()) }}</p>
+          <p class="kpi-label">Total Impressions</p>
+        </div>
+      </igx-card-content>
+    </igx-card>
+  </section>
+
+  <!-- Product Area Cards -->
+  <section aria-label="Product areas">
+    <h2 class="section-title">Product Areas</h2>
+    <div class="area-cards">
+      @for (stats of areaStats(); track stats.area) {
+        <igx-card class="area-card" igxRipple (click)="navigateToArea(stats.area)" role="button" [attr.aria-label]="'View ' + getAreaLabel(stats.area) + ' details'" tabindex="0" (keydown.enter)="navigateToArea(stats.area)" (keydown.space)="navigateToArea(stats.area)">
+          <igx-card-header>
+            <div class="area-header-icon" aria-hidden="true">
+              <igx-icon>{{ getAreaIcon(stats.area) }}</igx-icon>
+            </div>
+            <h3 igxCardHeaderTitle>{{ getAreaLabel(stats.area) }}</h3>
+            <p igxCardHeaderSubtitle>{{ stats.totalContent }} items total</p>
+          </igx-card-header>
+          <igx-card-content>
+            <div class="area-stats">
+              <div class="area-stat">
+                <span class="area-stat-value">{{ stats.publishedCount }}</span>
+                <span class="area-stat-label">Published</span>
+              </div>
+              <div class="area-stat">
+                <span class="area-stat-value">{{ stats.scheduledCount }}</span>
+                <span class="area-stat-label">Scheduled</span>
+              </div>
+              <div class="area-stat">
+                <span class="area-stat-value">{{ stats.pipelineCount }}</span>
+                <span class="area-stat-label">Pipeline</span>
+              </div>
+            </div>
+            <div class="area-impressions">
+              <igx-icon aria-hidden="true">visibility</igx-icon>
+              <span>{{ formatImpressions(stats.totalImpressions) }} impressions</span>
+              <span class="engagement-badge">{{ stats.avgEngagementRate }}% avg engagement</span>
+            </div>
+            @if (stats.topContent) {
+              <div class="top-content">
+                <span class="top-label">Top:</span>
+                <span class="top-title">{{ stats.topContent.title }}</span>
+              </div>
+            }
+          </igx-card-content>
+          <igx-card-actions>
+            <button igxButton="flat" igxRipple (click)="$event.stopPropagation(); navigateToArea(stats.area)">
+              View Details
+            </button>
+          </igx-card-actions>
+        </igx-card>
+      }
+    </div>
+  </section>
+
+  <div class="dashboard-lower">
+    <!-- Recent Published Content -->
+    <section class="content-list-section" aria-label="Recent published content">
+      <h2 class="section-title">Recent Published Content</h2>
+      @if (recentContent().length === 0) {
+        <div class="empty-state">
+          <igx-icon aria-hidden="true">article</igx-icon>
+          <p>No published content yet.</p>
+        </div>
+      } @else {
+        <igx-list>
+          @for (item of recentContent(); track item.id) {
+            <igx-list-item>
+              <div class="content-list-item">
+                <div class="content-list-main">
+                  <div class="content-list-header">
+                    <span class="content-list-title">{{ item.title }}</span>
+                    <span [class]="'status-badge ' + getStatusClass(item.status)">
+                      {{ getStatusLabel(item.status) }}
+                    </span>
+                  </div>
+                  <div class="content-list-meta">
+                    <span class="content-area-tag">{{ getAreaLabel(item.productArea) }}</span>
+                    <span class="content-date">{{ formatDate(item.publishedAt) }}</span>
+                    @for (medium of item.mediums; track medium) {
+                      <span class="medium-chip">{{ getMediumLabel(medium) }}</span>
+                    }
+                  </div>
+                </div>
+                @if (item.analytics) {
+                  <div class="content-list-analytics" aria-label="Analytics for {{ item.title }}">
+                    <span class="analytics-item">
+                      <igx-icon aria-hidden="true">visibility</igx-icon>
+                      {{ formatImpressions(item.analytics.impressions) }}
+                    </span>
+                    <span class="analytics-item">
+                      <igx-icon aria-hidden="true">thumb_up</igx-icon>
+                      {{ item.analytics.reactions }}
+                    </span>
+                  </div>
+                }
+              </div>
+            </igx-list-item>
+          }
+        </igx-list>
+      }
+    </section>
+
+    <!-- Pipeline & Scheduled -->
+    <div class="pipeline-scheduled">
+      <!-- Scheduled -->
+      <section class="pipeline-section" aria-label="Scheduled content">
+        <h2 class="section-title">
+          <igx-icon aria-hidden="true">schedule</igx-icon>
+          Scheduled
+          <igx-badge [value]="scheduledContent().length" type="info"></igx-badge>
+        </h2>
+        @if (scheduledContent().length === 0) {
+          <p class="empty-small">No scheduled content.</p>
+        } @else {
+          @for (item of scheduledContent(); track item.id) {
+            <div class="pipeline-item">
+              <div class="pipeline-item-title">{{ item.title }}</div>
+              <div class="pipeline-item-meta">
+                <span class="content-area-tag">{{ getAreaLabel(item.productArea) }}</span>
+                <span class="pipeline-date">{{ formatDate(item.scheduledAt) }}</span>
+              </div>
+            </div>
+          }
+        }
+      </section>
+
+      <!-- Pipeline -->
+      <section class="pipeline-section" aria-label="Content in pipeline">
+        <h2 class="section-title">
+          <igx-icon aria-hidden="true">pending_actions</igx-icon>
+          In Pipeline
+          <igx-badge [value]="pipelineContent().length" type="warning"></igx-badge>
+        </h2>
+        @if (pipelineContent().length === 0) {
+          <p class="empty-small">No content in pipeline.</p>
+        } @else {
+          @for (item of pipelineContent(); track item.id) {
+            <div class="pipeline-item">
+              <div class="pipeline-item-title">{{ item.title }}</div>
+              <div class="pipeline-item-meta">
+                <span class="content-area-tag">{{ getAreaLabel(item.productArea) }}</span>
+                @for (medium of item.mediums; track medium) {
+                  <span class="medium-chip">{{ getMediumLabel(medium) }}</span>
+                }
+              </div>
+            </div>
+          }
+        }
+      </section>
+    </div>
+  </div>
+</div>

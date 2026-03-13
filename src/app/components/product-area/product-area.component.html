@@ -1,0 +1,259 @@
+<div class="product-area">
+  <div class="page-header">
+    <div class="page-header-left">
+      <button igxIconButton="flat" igxRipple (click)="goBack()" aria-label="Back to dashboard">
+        <igx-icon>arrow_back</igx-icon>
+      </button>
+      <div class="area-title-group">
+        <igx-icon class="area-title-icon" aria-hidden="true">{{ areaIcon() }}</igx-icon>
+        <h1>{{ areaLabel() }}</h1>
+      </div>
+    </div>
+    <div class="page-header-actions">
+      <button igxButton="raised" igxRipple (click)="navigateToCreate()">
+        <igx-icon>add</igx-icon>
+        Create Content
+      </button>
+    </div>
+  </div>
+
+  @if (stats(); as s) {
+    <!-- KPI Summary -->
+    <section class="kpi-row" aria-label="Area statistics">
+      <igx-card class="kpi-card">
+        <igx-card-content>
+          <p class="kpi-value">{{ s.totalContent }}</p>
+          <p class="kpi-label">Total Items</p>
+        </igx-card-content>
+      </igx-card>
+      <igx-card class="kpi-card">
+        <igx-card-content>
+          <p class="kpi-value">{{ formatImpressions(s.totalImpressions) }}</p>
+          <p class="kpi-label">Total Impressions</p>
+        </igx-card-content>
+      </igx-card>
+      <igx-card class="kpi-card">
+        <igx-card-content>
+          <p class="kpi-value">{{ formatImpressions(s.totalReactions) }}</p>
+          <p class="kpi-label">Total Reactions</p>
+        </igx-card-content>
+      </igx-card>
+      <igx-card class="kpi-card">
+        <igx-card-content>
+          <p class="kpi-value">{{ s.avgEngagementRate }}%</p>
+          <p class="kpi-label">Avg Engagement</p>
+        </igx-card-content>
+      </igx-card>
+    </section>
+
+    <!-- Charts & Rankings -->
+    <div class="charts-row">
+      <!-- Impressions Over Time -->
+      <igx-card class="chart-card">
+        <igx-card-header>
+          <h2 igxCardHeaderTitle>Impressions Over Time</h2>
+          <p igxCardHeaderSubtitle>Last 7 months</p>
+        </igx-card-header>
+        <igx-card-content>
+          <igx-category-chart
+            [dataSource]="impressionsOverTime()"
+            chartType="Area"
+            [xAxisTitle]="'Month'"
+            [yAxisTitle]="'Impressions'"
+            [isHorizontalZoomEnabled]="false"
+            [isVerticalZoomEnabled]="false"
+            height="240px"
+            aria-label="Impressions over time chart">
+          </igx-category-chart>
+        </igx-card-content>
+      </igx-card>
+
+      <!-- Engagement by Medium -->
+      <igx-card class="chart-card">
+        <igx-card-header>
+          <h2 igxCardHeaderTitle>Reactions by Medium</h2>
+          <p igxCardHeaderSubtitle>Published content</p>
+        </igx-card-header>
+        <igx-card-content>
+          <igx-category-chart
+            [dataSource]="engagementByMedium()"
+            chartType="Column"
+            [xAxisTitle]="'Medium'"
+            [yAxisTitle]="'Reactions'"
+            [isHorizontalZoomEnabled]="false"
+            [isVerticalZoomEnabled]="false"
+            height="240px"
+            aria-label="Reactions by medium chart">
+          </igx-category-chart>
+        </igx-card-content>
+      </igx-card>
+    </div>
+
+    <!-- Top Content Ranking -->
+    <section class="ranking-section" aria-label="Top performing content">
+      <h2 class="section-title">
+        <igx-icon aria-hidden="true">emoji_events</igx-icon>
+        Top Performing Content
+      </h2>
+      @if (topContentRanking().length === 0) {
+        <div class="empty-state">
+          <igx-icon aria-hidden="true">article</igx-icon>
+          <p>No published content for this area yet.</p>
+        </div>
+      } @else {
+        <div class="ranking-list">
+          @for (item of topContentRanking(); track item.id; let rank = $index) {
+            <div class="ranking-item" [class.top-three]="rank < 3">
+              <div class="rank-badge" [class]="'rank-' + (rank + 1)" aria-label="Rank {{ rank + 1 }}">
+                {{ rank + 1 }}
+              </div>
+              <div class="ranking-content">
+                <div class="ranking-title">{{ item.title }}</div>
+                <div class="ranking-meta">
+                  <span class="content-date">{{ formatDate(item.publishedAt) }}</span>
+                  @for (medium of item.mediums; track medium) {
+                    <span class="medium-chip">{{ getMediumLabel(medium) }}</span>
+                  }
+                </div>
+              </div>
+              @if (item.analytics) {
+                <div class="ranking-stats" aria-label="Stats: {{ item.analytics.impressions }} impressions, {{ item.analytics.reactions }} reactions">
+                  <div class="ranking-stat">
+                    <igx-icon aria-hidden="true">visibility</igx-icon>
+                    <span>{{ formatImpressions(item.analytics.impressions) }}</span>
+                  </div>
+                  <div class="ranking-stat">
+                    <igx-icon aria-hidden="true">thumb_up</igx-icon>
+                    <span>{{ item.analytics.reactions }}</span>
+                  </div>
+                  <div class="ranking-stat">
+                    <igx-icon aria-hidden="true">share</igx-icon>
+                    <span>{{ item.analytics.shares }}</span>
+                  </div>
+                  <div class="engagement-rate">{{ item.analytics.engagementRate }}%</div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+    </section>
+
+    <!-- Content Tabs: Published / Scheduled / Pipeline -->
+    <section class="content-tabs-section">
+      <igx-tabs>
+        <igx-tab-item>
+          <igx-tab-header>
+            <div class="tab-label-inner">
+              <igx-icon aria-hidden="true">check_circle</igx-icon>
+              <span>Published ({{ s.publishedCount }})</span>
+            </div>
+          </igx-tab-header>
+          <igx-tab-content>
+            <div class="tab-content-inner">
+              @if (publishedContent().length === 0) {
+                <div class="empty-state">
+                  <igx-icon aria-hidden="true">article</igx-icon>
+                  <p>No published content.</p>
+                </div>
+              } @else {
+                @for (item of publishedContent(); track item.id) {
+                  <div class="content-row">
+                    <ng-container *ngTemplateOutlet="contentRowTpl; context: { $implicit: item }"></ng-container>
+                  </div>
+                }
+              }
+            </div>
+          </igx-tab-content>
+        </igx-tab-item>
+
+        <igx-tab-item>
+          <igx-tab-header>
+            <div class="tab-label-inner">
+              <igx-icon aria-hidden="true">schedule</igx-icon>
+              <span>Scheduled ({{ s.scheduledCount }})</span>
+            </div>
+          </igx-tab-header>
+          <igx-tab-content>
+            <div class="tab-content-inner">
+              @if (scheduledContent().length === 0) {
+                <div class="empty-state">
+                  <igx-icon aria-hidden="true">schedule</igx-icon>
+                  <p>No scheduled content.</p>
+                </div>
+              } @else {
+                @for (item of scheduledContent(); track item.id) {
+                  <div class="content-row">
+                    <ng-container *ngTemplateOutlet="contentRowTpl; context: { $implicit: item }"></ng-container>
+                  </div>
+                }
+              }
+            </div>
+          </igx-tab-content>
+        </igx-tab-item>
+
+        <igx-tab-item>
+          <igx-tab-header>
+            <div class="tab-label-inner">
+              <igx-icon aria-hidden="true">pending_actions</igx-icon>
+              <span>Pipeline ({{ s.pipelineCount }})</span>
+            </div>
+          </igx-tab-header>
+          <igx-tab-content>
+            <div class="tab-content-inner">
+              @if (pipelineContent().length === 0) {
+                <div class="empty-state">
+                  <igx-icon aria-hidden="true">pending_actions</igx-icon>
+                  <p>No content in pipeline.</p>
+                </div>
+              } @else {
+                @for (item of pipelineContent(); track item.id) {
+                  <div class="content-row">
+                    <ng-container *ngTemplateOutlet="contentRowTpl; context: { $implicit: item }"></ng-container>
+                  </div>
+                }
+              }
+            </div>
+          </igx-tab-content>
+        </igx-tab-item>
+      </igx-tabs>
+    </section>
+  }
+</div>
+
+<ng-template #contentRowTpl let-item>
+  <div class="content-row-inner">
+    <div class="content-row-main">
+      <div class="content-row-title">{{ item.title }}</div>
+      <div class="content-row-excerpt">{{ item.excerpt }}</div>
+      <div class="content-row-meta">
+        <span [class]="'status-badge ' + getStatusClass(item.status)">{{ getStatusLabel(item.status) }}</span>
+        @if (item.publishedAt) {
+          <span class="content-date">{{ formatDate(item.publishedAt) }}</span>
+        }
+        @if (item.scheduledAt) {
+          <span class="content-date">Scheduled: {{ formatDate(item.scheduledAt) }}</span>
+        }
+        @for (medium of item.mediums; track medium) {
+          <span class="medium-chip">{{ getMediumLabel(medium) }}</span>
+        }
+      </div>
+    </div>
+    @if (item.analytics) {
+      <div class="content-row-analytics" aria-label="Analytics">
+        <div class="analytics-pill">
+          <igx-icon aria-hidden="true">visibility</igx-icon>
+          {{ formatImpressions(item.analytics.impressions) }} impressions
+        </div>
+        <div class="analytics-pill">
+          <igx-icon aria-hidden="true">thumb_up</igx-icon>
+          {{ item.analytics.reactions }} reactions
+        </div>
+        <div class="analytics-pill">
+          <igx-icon aria-hidden="true">share</igx-icon>
+          {{ item.analytics.shares }} shares
+        </div>
+      </div>
+    }
+  </div>
+</ng-template>

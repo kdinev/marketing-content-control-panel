@@ -1,0 +1,466 @@
+<div class="content-creator">
+  <div class="page-header">
+    <div class="page-header-left">
+      <button igxIconButton="flat" igxRipple (click)="goBack()" aria-label="Back to dashboard">
+        <igx-icon>arrow_back</igx-icon>
+      </button>
+      <h1>Create Content</h1>
+    </div>
+  </div>
+
+  <div class="creator-layout">
+    <igx-stepper #stepper [linear]="true" orientation="horizontal" [stepType]="'full'">
+
+      <!-- ==================== STEP 1: Setup ==================== -->
+      <igx-step [completed]="step1Valid()">
+        <div igxStepTitle>Setup</div>
+        <div igxStepSubtitle>Area, mediums & prompt</div>
+        <div igxStepContent>
+          <div class="step-content">
+            <h2 class="step-heading">Content Setup</h2>
+
+            <!-- Product Area Selection -->
+            <section class="form-section" aria-labelledby="area-label">
+              <h3 id="area-label" class="form-section-label">Product Area *</h3>
+              <div class="area-selector" role="radiogroup" aria-labelledby="area-label">
+                @for (area of productAreas; track area) {
+                  <button
+                    class="area-btn"
+                    [class.selected]="state().productArea === area"
+                    (click)="selectArea(area)"
+                    [attr.aria-pressed]="state().productArea === area"
+                    type="button">
+                    <igx-icon aria-hidden="true">{{ getAreaIcon(area) }}</igx-icon>
+                    <span>{{ getAreaLabel(area) }}</span>
+                  </button>
+                }
+              </div>
+            </section>
+
+            <!-- Medium Selection -->
+            <section class="form-section" aria-labelledby="mediums-label">
+              <h3 id="mediums-label" class="form-section-label">Target Mediums * (select all that apply)</h3>
+              <div class="mediums-grid" role="group" aria-labelledby="mediums-label">
+                @for (medium of allMediums; track medium) {
+                  <label
+                    class="medium-btn"
+                    [class.selected]="isMediumSelected(medium)"
+                    [attr.aria-label]="getMediumLabel(medium) + (isMediumSelected(medium) ? ', selected' : '')">
+                    <input
+                      type="checkbox"
+                      class="sr-only"
+                      [checked]="isMediumSelected(medium)"
+                      (change)="toggleMedium(medium)" />
+                    <igx-icon aria-hidden="true">{{ getMediumIcon(medium) }}</igx-icon>
+                    <span>{{ getMediumLabel(medium) }}</span>
+                  </label>
+                }
+              </div>
+            </section>
+
+            <!-- Prompt -->
+            <section class="form-section">
+              <h3 class="form-section-label">Content Prompt *</h3>
+              <igx-input-group type="border" class="full-width">
+                <label igxLabel for="prompt-input">Describe the content you want to create</label>
+                <textarea
+                  id="prompt-input"
+                  igxInput
+                  name="prompt"
+                  rows="5"
+                  [ngModel]="state().prompt"
+                  (ngModelChange)="updatePrompt($event)"
+                  placeholder="E.g. Write a blog post about the top 5 features of our new release, focusing on enterprise developers who need high-performance data grids..."
+                  aria-required="true"></textarea>
+              </igx-input-group>
+              <p class="input-hint">The more detail you provide, the better the AI-generated content will be.</p>
+            </section>
+
+            <!-- API Token (optional) -->
+            <section class="form-section">
+              <h3 class="form-section-label">RAG API Token (optional)</h3>
+              <igx-input-group type="border" class="full-width">
+                <igx-prefix><igx-icon aria-hidden="true">key</igx-icon></igx-prefix>
+                <label igxLabel for="token-input">Bearer token for RAG service</label>
+                <input
+                  id="token-input"
+                  igxInput
+                  type="password"
+                  name="apiToken"
+                  autocomplete="off"
+                  [ngModel]="apiTokenInput()"
+                  (ngModelChange)="setApiToken($event)"
+                  placeholder="mcp-<kid>.<secret> or JWT token" />
+                <igx-hint>Leave blank to use mock data for demonstration</igx-hint>
+              </igx-input-group>
+            </section>
+
+            <!-- LLM API Keys (optional) -->
+            <section class="form-section">
+              <h3 class="form-section-label">LLM API Keys (optional)</h3>
+              <p class="input-hint">Provide a key for the provider matching your selected model. Leave blank to use mock responses.</p>
+              <div class="llm-keys-grid">
+                <igx-input-group type="border">
+                  <igx-prefix><igx-icon aria-hidden="true">vpn_key</igx-icon></igx-prefix>
+                  <label igxLabel for="openai-key-input">OpenAI API Key</label>
+                  <input
+                    id="openai-key-input"
+                    igxInput
+                    type="password"
+                    name="openAiKey"
+                    autocomplete="off"
+                    [ngModel]="openAiKeyInput()"
+                    (ngModelChange)="setLlmKey('openai', $event)"
+                    placeholder="sk-..." />
+                  <igx-hint>For gpt-5o, gpt-5-turbo</igx-hint>
+                </igx-input-group>
+                <igx-input-group type="border">
+                  <igx-prefix><igx-icon aria-hidden="true">vpn_key</igx-icon></igx-prefix>
+                  <label igxLabel for="anthropic-key-input">Anthropic API Key</label>
+                  <input
+                    id="anthropic-key-input"
+                    igxInput
+                    type="password"
+                    name="anthropicKey"
+                    autocomplete="off"
+                    [ngModel]="anthropicKeyInput()"
+                    (ngModelChange)="setLlmKey('anthropic', $event)"
+                    placeholder="sk-ant-..." />
+                  <igx-hint>For claude-4-5-sonnet, claude-4-haiku</igx-hint>
+                </igx-input-group>
+                <igx-input-group type="border">
+                  <igx-prefix><igx-icon aria-hidden="true">vpn_key</igx-icon></igx-prefix>
+                  <label igxLabel for="google-key-input">Google AI API Key</label>
+                  <input
+                    id="google-key-input"
+                    igxInput
+                    type="password"
+                    name="googleKey"
+                    autocomplete="off"
+                    [ngModel]="googleKeyInput()"
+                    (ngModelChange)="setLlmKey('google', $event)"
+                    placeholder="AIza..." />
+                  <igx-hint>For gemini-3.1-pro</igx-hint>
+                </igx-input-group>
+              </div>
+            </section>
+
+            <div class="step-actions">
+              <button
+                igxButton="raised"
+                igxRipple
+                [disabled]="!step1Valid() || isRagLoading()"
+                (click)="runRag()"
+                aria-label="Query product knowledge base and continue">
+                @if (isRagLoading()) {
+                  <igx-icon aria-hidden="true">hourglass_empty</igx-icon>
+                  Querying RAG...
+                } @else {
+                  <igx-icon aria-hidden="true">psychology</igx-icon>
+                  Query Product Knowledge Base
+                }
+              </button>
+            </div>
+          </div>
+        </div>
+      </igx-step>
+
+      <!-- ==================== STEP 2: RAG Augmentation ==================== -->
+      <igx-step [completed]="step2Valid()">
+        <div igxStepTitle>Augment</div>
+        <div igxStepSubtitle>Review RAG context</div>
+        <div igxStepContent>
+          <div class="step-content">
+            <h2 class="step-heading">RAG-Augmented Prompt</h2>
+            <p class="step-description">
+              The product knowledge base has returned the following context.
+              Review and refine the augmented prompt before proceeding to content generation.
+            </p>
+
+            @if (state().ragContext) {
+              <section class="form-section" aria-labelledby="rag-context-label">
+                <h3 id="rag-context-label" class="form-section-label">
+                  <igx-icon aria-hidden="true">auto_awesome</igx-icon>
+                  Retrieved Context
+                </h3>
+                <div class="rag-context-box" role="region" aria-label="RAG context from knowledge base">
+                  <p class="rag-context-text">{{ state().ragContext }}</p>
+                </div>
+              </section>
+
+              <section class="form-section">
+                <h3 class="form-section-label">Augmented Prompt (editable)</h3>
+                <igx-input-group type="border" class="full-width">
+                  <label igxLabel for="augmented-prompt">Review and refine your augmented prompt</label>
+                  <textarea
+                    id="augmented-prompt"
+                    igxInput
+                    name="augmentedPrompt"
+                    rows="8"
+                    [ngModel]="state().augmentedPrompt"
+                    (ngModelChange)="updateAugmentedPrompt($event)"></textarea>
+                </igx-input-group>
+              </section>
+            }
+
+            <div class="step-actions">
+              <button igxButton="flat" igxRipple (click)="prevStep()">
+                <igx-icon>arrow_back</igx-icon>
+                Back
+              </button>
+              <button igxButton="raised" igxRipple (click)="nextStep()" [disabled]="!step2Valid()">
+                Choose Model
+                <igx-icon>arrow_forward</igx-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+      </igx-step>
+
+      <!-- ==================== STEP 3: Model Selection & Generate ==================== -->
+      <igx-step [completed]="allGenerated()">
+        <div igxStepTitle>Generate</div>
+        <div igxStepSubtitle>Select model & generate</div>
+        <div igxStepContent>
+          <div class="step-content">
+            <h2 class="step-heading">Choose AI Model & Generate</h2>
+
+            <section class="form-section" aria-labelledby="model-label">
+              <h3 id="model-label" class="form-section-label">AI Model *</h3>
+              <div class="model-grid" role="radiogroup" aria-labelledby="model-label">
+                @for (model of allModels; track model) {
+                  <button
+                    class="model-btn"
+                    [class.selected]="state().model === model"
+                    (click)="selectModel(model)"
+                    [attr.aria-pressed]="state().model === model"
+                    type="button">
+                    <igx-icon class="model-icon" aria-hidden="true">smart_toy</igx-icon>
+                    <span class="model-name">{{ getModelLabel(model) }}</span>
+                  </button>
+                }
+              </div>
+            </section>
+
+            <section class="form-section">
+              <h3 class="form-section-label">Selected Mediums</h3>
+              <igx-chips-area>
+                @for (medium of state().mediums; track medium) {
+                  <igx-chip [removable]="false" [selectable]="false">
+                    <igx-icon igxPrefix aria-hidden="true">{{ getMediumIcon(medium) }}</igx-icon>
+                    {{ getMediumLabel(medium) }}
+                  </igx-chip>
+                }
+              </igx-chips-area>
+            </section>
+
+            @if (isGenerating()) {
+              <div class="generating-status" role="status" aria-live="polite">
+                <p class="generating-label">
+                  Generating content for
+                  @if (generatingMedium(); as m) {
+                    <strong>{{ getMediumLabel(m) }}</strong>
+                  }
+                  ...
+                </p>
+                <igx-linear-bar
+                  [value]="generationProgress()"
+                  [max]="100"
+                  [striped]="true"
+                  [animate]="true"
+                  type="info"
+                  aria-label="Generation progress">
+                </igx-linear-bar>
+              </div>
+            }
+
+            <div class="step-actions">
+              <button igxButton="flat" igxRipple (click)="prevStep()" [disabled]="isGenerating()">
+                <igx-icon>arrow_back</igx-icon>
+                Back
+              </button>
+              <button
+                igxButton="raised"
+                igxRipple
+                [disabled]="!step3Valid() || isGenerating()"
+                (click)="generateAllContent()">
+                @if (isGenerating()) {
+                  <igx-icon aria-hidden="true">hourglass_empty</igx-icon>
+                  Generating...
+                } @else {
+                  <igx-icon aria-hidden="true">auto_awesome</igx-icon>
+                  Generate Content
+                }
+              </button>
+            </div>
+          </div>
+        </div>
+      </igx-step>
+
+      <!-- ==================== STEP 4: Review & Edit ==================== -->
+      <igx-step [completed]="step4Valid()">
+        <div igxStepTitle>Review</div>
+        <div igxStepSubtitle>Vet & refine content</div>
+        <div igxStepContent>
+          <div class="step-content">
+            <h2 class="step-heading">Review & Edit Generated Content</h2>
+            <p class="step-description">
+              Review the AI-generated content for each medium. Edit as needed before proceeding to publishing.
+            </p>
+
+            @for (medium of state().mediums; track medium) {
+              <section class="form-section content-edit-section" [attr.aria-labelledby]="'medium-label-' + medium">
+                <h3 [id]="'medium-label-' + medium" class="form-section-label medium-section-header">
+                  <igx-icon aria-hidden="true">{{ getMediumIcon(medium) }}</igx-icon>
+                  {{ getMediumLabel(medium) }}
+                </h3>
+                <igx-input-group type="border" class="full-width">
+                  <label igxLabel [for]="'content-' + medium">Content for {{ getMediumLabel(medium) }}</label>
+                  <textarea
+                    [id]="'content-' + medium"
+                    igxInput
+                    [name]="'content-' + medium"
+                    rows="10"
+                    [ngModel]="state().finalContent[medium] ?? ''"
+                    (ngModelChange)="updateFinalContent(medium, $event)"></textarea>
+                </igx-input-group>
+              </section>
+            }
+
+            <div class="step-actions">
+              <button igxButton="flat" igxRipple (click)="prevStep()">
+                <igx-icon>arrow_back</igx-icon>
+                Back
+              </button>
+              <button igxButton="raised" igxRipple (click)="nextStep()" [disabled]="!step4Valid()">
+                Publishing Options
+                <igx-icon>arrow_forward</igx-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+      </igx-step>
+
+      <!-- ==================== STEP 5: Publish ==================== -->
+      <igx-step>
+        <div igxStepTitle>Publish</div>
+        <div igxStepSubtitle>Schedule or post now</div>
+        <div igxStepContent>
+          <div class="step-content">
+            <h2 class="step-heading">Publishing Options</h2>
+
+            <!-- Summary -->
+            <section class="summary-box" aria-label="Content summary">
+              <div class="summary-row">
+                <span class="summary-key">Product Area</span>
+                <span class="summary-val">
+                  @if (state().productArea) {
+                    {{ getAreaLabel(state().productArea!) }}
+                  }
+                </span>
+              </div>
+              <div class="summary-row">
+                <span class="summary-key">Mediums</span>
+                <div class="summary-val mediums-summary">
+                  @for (medium of state().mediums; track medium) {
+                    <span class="medium-chip">{{ getMediumLabel(medium) }}</span>
+                  }
+                </div>
+              </div>
+              <div class="summary-row">
+                <span class="summary-key">AI Model</span>
+                <span class="summary-val">
+                  @if (state().model) {
+                    {{ getModelLabel(state().model!) }}
+                  }
+                </span>
+              </div>
+            </section>
+
+            <!-- Publish options -->
+            <section class="form-section publish-options" aria-labelledby="publish-options-label">
+              <h3 id="publish-options-label" class="form-section-label">Publishing Action</h3>
+
+              <div class="publish-cards">
+                <igx-card class="publish-option-card" igxRipple role="button" aria-label="Post immediately to all selected mediums">
+                  <igx-card-header>
+                    <h4 igxCardHeaderTitle>
+                      <igx-icon class="publish-icon immediate" aria-hidden="true">send</igx-icon>
+                      Post Immediately
+                    </h4>
+                    <p igxCardHeaderSubtitle>Send to all selected mediums now</p>
+                  </igx-card-header>
+                  <igx-card-content>
+                    <p>Content will be submitted for immediate posting to all {{ state().mediums.length }} selected medium(s) via the integration service.</p>
+                  </igx-card-content>
+                  <div class="publish-action">
+                    <button igxButton="raised" igxRipple (click)="submitContent(true)" [disabled]="!step4Valid()">
+                      <igx-icon>send</igx-icon>
+                      Post Now
+                    </button>
+                  </div>
+                </igx-card>
+
+                <igx-card class="publish-option-card" role="region" aria-label="Schedule for later publishing">
+                  <igx-card-header>
+                    <h4 igxCardHeaderTitle>
+                      <igx-icon class="publish-icon schedule" aria-hidden="true">event</igx-icon>
+                      Schedule for Later
+                    </h4>
+                    <p igxCardHeaderSubtitle>Pick a date and time</p>
+                  </igx-card-header>
+                  <igx-card-content>
+                    <igx-date-picker
+                      [ngModel]="scheduleDate()"
+                      (ngModelChange)="scheduleDate.set($event)"
+                      [minValue]="today"
+                      placeholder="Select publish date"
+                      aria-label="Select publishing date">
+                    </igx-date-picker>
+                  </igx-card-content>
+                  <div class="publish-action">
+                    <button igxButton="outlined" igxRipple (click)="submitContent(false)" [disabled]="!scheduleDate() || !step4Valid()">
+                      <igx-icon>event</igx-icon>
+                      Schedule
+                    </button>
+                  </div>
+                </igx-card>
+
+                <igx-card class="publish-option-card" role="region" aria-label="Save to pipeline for later">
+                  <igx-card-header>
+                    <h4 igxCardHeaderTitle>
+                      <igx-icon class="publish-icon pipeline" aria-hidden="true">pending_actions</igx-icon>
+                      Save to Pipeline
+                    </h4>
+                    <p igxCardHeaderSubtitle>Come back to this later</p>
+                  </igx-card-header>
+                  <igx-card-content>
+                    <p>Save this content to the pipeline for review and publishing at a later time.</p>
+                  </igx-card-content>
+                  <div class="publish-action">
+                    <button igxButton="flat" igxRipple (click)="submitContent(false)">
+                      <igx-icon>save</igx-icon>
+                      Save to Pipeline
+                    </button>
+                  </div>
+                </igx-card>
+              </div>
+            </section>
+
+            <div class="step-actions">
+              <button igxButton="flat" igxRipple (click)="prevStep()">
+                <igx-icon>arrow_back</igx-icon>
+                Back
+              </button>
+            </div>
+          </div>
+        </div>
+      </igx-step>
+
+    </igx-stepper>
+  </div>
+</div>
+
+<igx-snackbar #snackbar [displayTime]="3000" [autoHide]="true">
+  {{ snackbarMessage() }}
+</igx-snackbar>

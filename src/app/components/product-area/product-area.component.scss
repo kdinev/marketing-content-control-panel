@@ -1,0 +1,299 @@
+@use 'igniteui-angular/theming' as *;
+
+// Compact, horizontal-label tabs theme scoped to this component
+$compact-tabs: tabs-theme(
+  $schema: $light-material-schema,
+  $item-background: var(--ig-surface-500),
+  $item-active-color: var(--ig-primary-500)
+);
+
+:host {
+  display: block;
+  width: 100%;
+
+  @include tokens($compact-tabs);
+}
+
+.product-area {
+  width: 100%;
+}
+
+.page-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  .area-title-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .area-title-icon {
+      font-size: 1.5rem;
+      color: var(--ig-primary-500, #6c63ff);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.75rem;
+      font-weight: 600;
+      color: #1a1a2e;
+    }
+  }
+}
+
+/* KPI Cards */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.kpi-card {
+  text-align: center;
+
+  igx-card-content {
+    padding: 20px;
+  }
+
+  .kpi-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--ig-primary-500, #6c63ff);
+    margin: 0 0 4px 0;
+  }
+
+  .kpi-label {
+    font-size: 0.875rem;
+    color: #666;
+    margin: 0;
+  }
+}
+
+/* Charts */
+.charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.chart-card {
+  igx-card-content {
+    padding: 0 16px 16px;
+  }
+}
+
+/* Ranking */
+.ranking-section {
+  margin-bottom: 32px;
+
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    igx-icon {
+      color: #f9a825;
+      font-size: 1.25rem;
+    }
+  }
+}
+
+.ranking-list {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.ranking-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 20px;
+  border-bottom: 1px solid #f0f0f0;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &.top-three {
+    background: #fafafa;
+  }
+}
+
+.rank-badge {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+  background: #e0e0e0;
+  color: #555;
+
+  &.rank-1 { background: #ffd700; color: #5d4037; }
+  &.rank-2 { background: #c0c0c0; color: #37474f; }
+  &.rank-3 { background: #cd7f32; color: #fff; }
+}
+
+.ranking-content {
+  flex: 1;
+  min-width: 0;
+
+  .ranking-title {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: #1a1a2e;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 4px;
+  }
+
+  .ranking-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+}
+
+.ranking-stats {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+
+  .ranking-stat {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.875rem;
+    color: #555;
+
+    igx-icon {
+      font-size: 1rem;
+      color: #aaa;
+    }
+  }
+
+  .engagement-rate {
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: #e8f5e9;
+    color: #2e7d32;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+}
+
+/* Tabs */
+.content-tabs-section {
+  igx-tabs {
+    // compact size token: reduces tab item height to the small variant
+    --igx-size: 1;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+  }
+}
+
+.tab-label-inner {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+
+  igx-icon {
+    font-size: 1.1rem;
+    width: 1.1rem;
+    height: 1.1rem;
+    flex-shrink: 0;
+  }
+}
+
+.tab-content-inner {
+  padding: 16px;
+}
+
+.content-row {
+  border-bottom: 1px solid #f0f0f0;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.content-row-inner {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 14px 0;
+
+  .content-row-main {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .content-row-title {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: #1a1a2e;
+    margin-bottom: 4px;
+  }
+
+  .content-row-excerpt {
+    font-size: 0.875rem;
+    color: #666;
+    line-height: 1.4;
+    margin-bottom: 8px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .content-row-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+}
+
+.content-row-analytics {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+  min-width: 180px;
+}
+
+.analytics-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8125rem;
+  color: #555;
+  background: #f5f5f5;
+  padding: 4px 10px;
+  border-radius: 20px;
+
+  igx-icon {
+    font-size: 0.9rem;
+    color: #aaa;
+  }
+}
+
+.content-date {
+  font-size: 0.8125rem;
+  color: #888;
+}
