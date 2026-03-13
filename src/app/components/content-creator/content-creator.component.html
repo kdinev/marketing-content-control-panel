@@ -22,40 +22,54 @@
             <!-- Product Area Selection -->
             <section class="form-section" aria-labelledby="area-label">
               <h3 id="area-label" class="form-section-label">Product Area *</h3>
-              <div class="area-selector" role="radiogroup" aria-labelledby="area-label">
-                @for (area of productAreas; track area) {
-                  <button
-                    class="area-btn"
-                    [class.selected]="state().productArea === area"
-                    (click)="selectArea(area)"
-                    [attr.aria-pressed]="state().productArea === area"
-                    type="button">
-                    <igx-icon aria-hidden="true">{{ getAreaIcon(area) }}</igx-icon>
-                    <span>{{ getAreaLabel(area) }}</span>
-                  </button>
-                }
-              </div>
+              <igx-buttongroup
+                selectionMode="singleRequired"
+                (selected)="selectArea(productAreas[$event.index])"
+                aria-labelledby="area-label">
+                <button igxButton [selected]="state().productArea === 'dev-tools'" type="button">
+                  <igx-icon aria-hidden="true">code</igx-icon>
+                  Dev Tools
+                </button>
+                <button igxButton [selected]="state().productArea === 'reveal'" type="button">
+                  <igx-icon aria-hidden="true">bar_chart</igx-icon>
+                  Reveal
+                </button>
+                <button igxButton [selected]="state().productArea === 'slingshot'" type="button">
+                  <igx-icon aria-hidden="true">rocket_launch</igx-icon>
+                  Slingshot
+                </button>
+              </igx-buttongroup>
             </section>
 
             <!-- Medium Selection -->
             <section class="form-section" aria-labelledby="mediums-label">
               <h3 id="mediums-label" class="form-section-label">Target Mediums * (select all that apply)</h3>
-              <div class="mediums-grid" role="group" aria-labelledby="mediums-label">
-                @for (medium of allMediums; track medium) {
-                  <label
-                    class="medium-btn"
-                    [class.selected]="isMediumSelected(medium)"
-                    [attr.aria-label]="getMediumLabel(medium) + (isMediumSelected(medium) ? ', selected' : '')">
-                    <input
-                      type="checkbox"
-                      class="sr-only"
-                      [checked]="isMediumSelected(medium)"
-                      (change)="toggleMedium(medium)" />
-                    <igx-icon aria-hidden="true">{{ getMediumIcon(medium) }}</igx-icon>
-                    <span>{{ getMediumLabel(medium) }}</span>
-                  </label>
-                }
-              </div>
+              <igx-buttongroup
+                selectionMode="multi"
+                (selected)="toggleMedium(allMediums[$event.index])"
+                (deselected)="toggleMedium(allMediums[$event.index])"
+                aria-labelledby="mediums-label">
+                <button igxButton [selected]="isMediumSelected('blog')" type="button">
+                  <igx-icon aria-hidden="true">article</igx-icon>
+                  Blog Post
+                </button>
+                <button igxButton [selected]="isMediumSelected('forum')" type="button">
+                  <igx-icon aria-hidden="true">forum</igx-icon>
+                  Forum Post
+                </button>
+                <button igxButton [selected]="isMediumSelected('facebook')" type="button">
+                  <igx-icon aria-hidden="true">thumb_up</igx-icon>
+                  Facebook
+                </button>
+                <button igxButton [selected]="isMediumSelected('linkedin')" type="button">
+                  <igx-icon aria-hidden="true">work</igx-icon>
+                  LinkedIn
+                </button>
+                <button igxButton [selected]="isMediumSelected('twitter')" type="button">
+                  <igx-icon aria-hidden="true">tag</igx-icon>
+                  X (Twitter)
+                </button>
+              </igx-buttongroup>
             </section>
 
             <!-- Prompt -->
