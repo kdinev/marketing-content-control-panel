@@ -114,7 +114,7 @@ export class ContentCreatorComponent {
     'gpt-5-turbo',
     'claude-4-5-sonnet',
     'claude-4-haiku',
-    'gemini-3.1-pro',
+    'gemini-3.1-pro-preview',
   ];
 
   readonly step1Valid = computed(() => {

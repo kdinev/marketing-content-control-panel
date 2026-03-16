@@ -6,7 +6,7 @@ export type LlmModel =
   | 'gpt-5-turbo'
   | 'claude-4-5-sonnet'
   | 'claude-4-haiku'
-  | 'gemini-3.1-pro';
+  | 'gemini-3.1-pro-preview';
 
 export interface ContentAnalytics {
   impressions: number;
@@ -112,5 +112,5 @@ export const LLM_MODEL_LABELS: Record<LlmModel, string> = {
   'gpt-5-turbo': 'GPT-5 Turbo (OpenAI)',
   'claude-4-5-sonnet': 'Claude 4.5 Sonnet (Anthropic)',
   'claude-4-haiku': 'Claude 4 Haiku (Anthropic)',
-  'gemini-3.1-pro': 'Gemini 3.1 Pro (Google)',
+  'gemini-3.1-pro-preview': 'Gemini 3.1 Pro Preview (Google)',
 };
