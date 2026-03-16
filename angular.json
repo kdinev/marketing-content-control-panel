@@ -33,7 +33,6 @@
               "includePaths": ["node_modules"]
             },
             "styles": [
-              "node_modules/igniteui-angular/styles/igniteui-angular.css",
               "src/styles.scss"
             ],
             "server": "src/main.server.ts",

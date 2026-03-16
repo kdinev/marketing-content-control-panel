@@ -16,7 +16,7 @@
 .app-content {
   flex: 1;
   overflow-y: auto;
-  background: #f5f6fa;
+  background: var(--ig-surface-100);
   padding: 24px;
 }
 
@@ -26,8 +26,8 @@
   justify-content: space-between;
   padding: 0 16px;
   height: 64px;
-  background: #fff;
-  border-bottom: 1px solid #e0e0e0;
+  background: var(--ig-surface-500);
+  border-bottom: 1px solid var(--ig-gray-300);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
   flex-shrink: 0;
 
@@ -46,7 +46,7 @@
   .toolbar-title {
     font-size: 1.125rem;
     font-weight: 600;
-    color: #1a1a2e;
+    color: var(--ig-primary-900);
   }
 }
 
@@ -57,14 +57,14 @@
   padding: 20px 16px 12px;
 
   .nav-logo {
-    color: var(--ig-primary-500, #6c63ff);
+    color: var(--ig-primary-500);
     font-size: 1.5rem;
   }
 
   .nav-title {
     font-size: 1.125rem;
     font-weight: 700;
-    color: #1a1a2e;
+    color: var(--ig-primary-900);
   }
 }
 

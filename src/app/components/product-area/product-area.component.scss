@@ -2,7 +2,7 @@
 
 // Compact, horizontal-label tabs theme scoped to this component
 $compact-tabs: tabs-theme(
-  $schema: $light-material-schema,
+  $schema: $light-indigo-schema,
   $item-background: var(--ig-surface-500),
   $item-active-color: var(--ig-primary-500)
 );
@@ -30,14 +30,14 @@ $compact-tabs: tabs-theme(
 
     .area-title-icon {
       font-size: 1.5rem;
-      color: var(--ig-primary-500, #6c63ff);
+      color: var(--ig-primary-500);
     }
 
     h1 {
       margin: 0;
       font-size: 1.75rem;
       font-weight: 600;
-      color: #1a1a2e;
+      color: var(--ig-primary-900);
     }
   }
 }
@@ -60,13 +60,13 @@ $compact-tabs: tabs-theme(
   .kpi-value {
     font-size: 2rem;
     font-weight: 700;
-    color: var(--ig-primary-500, #6c63ff);
+    color: var(--ig-primary-500);
     margin: 0 0 4px 0;
   }
 
   .kpi-label {
     font-size: 0.875rem;
-    color: #666;
+    color: var(--ig-gray-600);
     margin: 0;
   }
 }
@@ -95,14 +95,14 @@ $compact-tabs: tabs-theme(
     gap: 8px;
 
     igx-icon {
-      color: #f9a825;
+      color: var(--ig-warn-A200);
       font-size: 1.25rem;
     }
   }
 }
 
 .ranking-list {
-  background: #fff;
+  background: var(--ig-surface-500);
   border-radius: 8px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
   overflow: hidden;
@@ -113,14 +113,14 @@ $compact-tabs: tabs-theme(
   align-items: center;
   gap: 16px;
   padding: 14px 20px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--ig-gray-200);
 
   &:last-child {
     border-bottom: none;
   }
 
   &.top-three {
-    background: #fafafa;
+    background: var(--ig-gray-50);
   }
 }
 
@@ -134,8 +134,8 @@ $compact-tabs: tabs-theme(
   font-weight: 700;
   font-size: 0.875rem;
   flex-shrink: 0;
-  background: #e0e0e0;
-  color: #555;
+  background: var(--ig-gray-300);
+  color: var(--ig-gray-700);
 
   &.rank-1 { background: #ffd700; color: #5d4037; }
   &.rank-2 { background: #c0c0c0; color: #37474f; }
@@ -149,7 +149,7 @@ $compact-tabs: tabs-theme(
   .ranking-title {
     font-size: 0.9375rem;
     font-weight: 600;
-    color: #1a1a2e;
+    color: var(--ig-primary-900);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -175,19 +175,19 @@ $compact-tabs: tabs-theme(
     align-items: center;
     gap: 4px;
     font-size: 0.875rem;
-    color: #555;
+    color: var(--ig-gray-700);
 
     igx-icon {
       font-size: 1rem;
-      color: #aaa;
+      color: var(--ig-gray-400);
     }
   }
 
   .engagement-rate {
     padding: 2px 8px;
     border-radius: 10px;
-    background: #e8f5e9;
-    color: #2e7d32;
+    background: var(--ig-success-100);
+    color: var(--ig-success-700);
     font-size: 0.75rem;
     font-weight: 700;
   }
@@ -198,7 +198,7 @@ $compact-tabs: tabs-theme(
   igx-tabs {
     // compact size token: reduces tab item height to the small variant
     --igx-size: 1;
-    background: #fff;
+    background: var(--ig-surface-500);
     border-radius: 8px;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
     overflow: hidden;
@@ -225,7 +225,7 @@ $compact-tabs: tabs-theme(
 }
 
 .content-row {
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--ig-gray-200);
 
   &:last-child {
     border-bottom: none;
@@ -246,13 +246,13 @@ $compact-tabs: tabs-theme(
   .content-row-title {
     font-size: 0.9375rem;
     font-weight: 600;
-    color: #1a1a2e;
+    color: var(--ig-primary-900);
     margin-bottom: 4px;
   }
 
   .content-row-excerpt {
     font-size: 0.875rem;
-    color: #666;
+    color: var(--ig-gray-600);
     line-height: 1.4;
     margin-bottom: 8px;
     display: -webkit-box;
@@ -282,18 +282,18 @@ $compact-tabs: tabs-theme(
   align-items: center;
   gap: 6px;
   font-size: 0.8125rem;
-  color: #555;
-  background: #f5f5f5;
+  color: var(--ig-gray-700);
+  background: var(--ig-gray-100);
   padding: 4px 10px;
   border-radius: 20px;
 
   igx-icon {
     font-size: 0.9rem;
-    color: #aaa;
+    color: var(--ig-gray-400);
   }
 }
 
 .content-date {
   font-size: 0.8125rem;
-  color: #888;
+  color: var(--ig-gray-500);
 }

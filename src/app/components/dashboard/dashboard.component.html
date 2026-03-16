@@ -2,7 +2,7 @@
   <div class="page-header">
     <h1>Marketing Dashboard</h1>
     <div class="page-header-actions">
-      <button igxButton="raised" igxRipple (click)="navigateToCreate()">
+      <button igxButton="contained" igxRipple (click)="navigateToCreate()">
         <igx-icon>add</igx-icon>
         Create Content
       </button>
@@ -129,10 +129,10 @@
                     </span>
                   </div>
                   <div class="content-list-meta">
-                    <span class="content-area-tag">{{ getAreaLabel(item.productArea) }}</span>
+                    <igx-chip class="area-chip" [removable]="false" [selectable]="false">{{ getAreaLabel(item.productArea) }}</igx-chip>
                     <span class="content-date">{{ formatDate(item.publishedAt) }}</span>
                     @for (medium of item.mediums; track medium) {
-                      <span class="medium-chip">{{ getMediumLabel(medium) }}</span>
+                      <igx-chip class="medium-chip" [removable]="false" [selectable]="false">{{ getMediumLabel(medium) }}</igx-chip>
                     }
                   </div>
                 </div>
@@ -171,7 +171,7 @@
             <div class="pipeline-item">
               <div class="pipeline-item-title">{{ item.title }}</div>
               <div class="pipeline-item-meta">
-                <span class="content-area-tag">{{ getAreaLabel(item.productArea) }}</span>
+                <igx-chip class="area-chip" [removable]="false" [selectable]="false">{{ getAreaLabel(item.productArea) }}</igx-chip>
                 <span class="pipeline-date">{{ formatDate(item.scheduledAt) }}</span>
               </div>
             </div>
@@ -193,9 +193,9 @@
             <div class="pipeline-item">
               <div class="pipeline-item-title">{{ item.title }}</div>
               <div class="pipeline-item-meta">
-                <span class="content-area-tag">{{ getAreaLabel(item.productArea) }}</span>
+                <igx-chip class="area-chip" [removable]="false" [selectable]="false">{{ getAreaLabel(item.productArea) }}</igx-chip>
                 @for (medium of item.mediums; track medium) {
-                  <span class="medium-chip">{{ getMediumLabel(medium) }}</span>
+                  <igx-chip class="medium-chip" [removable]="false" [selectable]="false">{{ getMediumLabel(medium) }}</igx-chip>
                 }
               </div>
             </div>

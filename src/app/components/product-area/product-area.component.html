@@ -10,7 +10,7 @@
       </div>
     </div>
     <div class="page-header-actions">
-      <button igxButton="raised" igxRipple (click)="navigateToCreate()">
+      <button igxButton="contained" igxRipple (click)="navigateToCreate()">
         <igx-icon>add</igx-icon>
         Create Content
       </button>
@@ -112,7 +112,7 @@
                 <div class="ranking-meta">
                   <span class="content-date">{{ formatDate(item.publishedAt) }}</span>
                   @for (medium of item.mediums; track medium) {
-                    <span class="medium-chip">{{ getMediumLabel(medium) }}</span>
+                    <igx-chip class="medium-chip" [removable]="false" [selectable]="false">{{ getMediumLabel(medium) }}</igx-chip>
                   }
                 </div>
               </div>
@@ -235,7 +235,7 @@
           <span class="content-date">Scheduled: {{ formatDate(item.scheduledAt) }}</span>
         }
         @for (medium of item.mediums; track medium) {
-          <span class="medium-chip">{{ getMediumLabel(medium) }}</span>
+          <igx-chip class="medium-chip" [removable]="false" [selectable]="false">{{ getMediumLabel(medium) }}</igx-chip>
         }
       </div>
     </div>

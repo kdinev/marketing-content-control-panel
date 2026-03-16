@@ -1,3 +1,27 @@
+@use 'igniteui-angular/theming' as *;
+
+// ── Infragistics Brand Theme ────────────────────────────────────────────────
+// Palette: navy primary (#003F7C) + orange secondary (#F05A28)
+// Design system: Indigo — the Infragistics native design language
+
+$ig-palette: palette(
+  $primary: #003F7C,
+  $secondary: #F05A28,
+  $surface: #FFFFFF
+);
+
+@include typography(
+  $font-family: "'Titillium Web', 'Roboto', sans-serif",
+  $type-scale: $material-type-scale
+);
+
+@include core();
+
+@include theme(
+  $palette: $ig-palette,
+  $schema: $light-indigo-schema
+);
+
 /* Global styles */
 *,
 *::before,
@@ -10,8 +34,8 @@ body {
   height: 100%;
   margin: 0;
   font-family: 'Titillium Web', 'Roboto', sans-serif;
-  background: #f5f6fa;
-  color: #333;
+  background: var(--ig-surface-100);
+  color: var(--ig-gray-800);
 }
 
 .app-layout {
@@ -43,7 +67,7 @@ body {
     margin: 0;
     font-size: 1.75rem;
     font-weight: 600;
-    color: #1a1a2e;
+    color: var(--ig-primary-900);
   }
 
   .page-header-actions {
@@ -59,12 +83,12 @@ body {
   .stat-value {
     font-size: 2rem;
     font-weight: 700;
-    color: var(--ig-primary-500, #6c63ff);
+    color: var(--ig-primary-500);
   }
 
   .stat-label {
     font-size: 0.875rem;
-    color: #666;
+    color: var(--ig-gray-600);
     margin-top: 4px;
   }
 }
@@ -80,53 +104,73 @@ body {
   letter-spacing: 0.5px;
 
   &.published {
-    background: #e8f5e9;
-    color: #2e7d32;
+    background: var(--ig-success-100);
+    color: var(--ig-success-700);
   }
 
   &.scheduled {
-    background: #e3f2fd;
-    color: #1565c0;
+    background: var(--ig-info-100);
+    color: var(--ig-info-700);
   }
 
   &.pipeline {
-    background: #fff8e1;
-    color: #f57f17;
+    background: var(--ig-warn-100);
+    color: var(--ig-warn-700);
   }
 
   &.draft {
-    background: #f3e5f5;
-    color: #6a1b9a;
+    background: var(--ig-secondary-100);
+    color: var(--ig-secondary-700);
   }
 }
 
-.medium-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 2px 8px;
-  border-radius: 8px;
-  font-size: 0.75rem;
-  background: #ede7f6;
-  color: #4527a0;
-  margin: 2px;
+// Medium label chips (Blog Post, LinkedIn, Twitter…) — navy solid, white text
+$medium-chip-theme: chip-theme(
+  $schema: $light-indigo-schema,
+  $background: var(--ig-primary-600),
+  $text-color: #ffffff,
+  $border-color: transparent,
+  $hover-background: var(--ig-primary-700),
+  $hover-text-color: #ffffff,
+  $hover-border-color: transparent
+);
+
+igx-chip.medium-chip {
+  --ig-size: 1; // small
+  @include tokens($medium-chip-theme);
+}
+
+// Area tag chips (Reveal, Dev Tools, Slingshot) — light orange, dark text
+$area-chip-theme: chip-theme(
+  $schema: $light-indigo-schema,
+  $background: var(--ig-secondary-100),
+  $text-color: var(--ig-secondary-800),
+  $border-color: var(--ig-secondary-300),
+  $hover-background: var(--ig-secondary-200),
+  $hover-text-color: var(--ig-secondary-900),
+  $hover-border-color: var(--ig-secondary-400)
+);
+
+igx-chip.area-chip {
+  --ig-size: 1; // small
+  @include tokens($area-chip-theme);
 }
 
 .section-title {
   font-size: 1.125rem;
   font-weight: 600;
-  color: #1a1a2e;
+  color: var(--ig-primary-900);
   margin: 0 0 16px 0;
 }
 
 .empty-state {
   text-align: center;
   padding: 48px 24px;
-  color: #888;
+  color: var(--ig-gray-500);
 
   igx-icon {
     font-size: 3rem;
-    color: #ccc;
+    color: var(--ig-gray-300);
     display: block;
     margin-bottom: 12px;
   }

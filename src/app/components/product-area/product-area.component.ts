@@ -8,6 +8,7 @@ import { IgxIconComponent } from 'igniteui-angular/icon';
 import { IgxButtonDirective, IgxRippleDirective, IgxIconButtonDirective } from 'igniteui-angular/directives';
 import { IGX_TABS_DIRECTIVES } from 'igniteui-angular/tabs';
 import { IGX_LIST_DIRECTIVES } from 'igniteui-angular/list';
+import { IgxChipComponent } from 'igniteui-angular/chips';
 import { IgxCategoryChartModule } from 'igniteui-angular-charts';
 import { ContentService } from '../../services/content.service';
 import {
@@ -35,6 +36,7 @@ import {
     IgxRippleDirective,
     IGX_TABS_DIRECTIVES,
     IGX_LIST_DIRECTIVES,
+    IgxChipComponent,
     IgxCategoryChartModule,
   ],
   templateUrl: './product-area.component.html',

@@ -1,3 +1,16 @@
+@use 'igniteui-angular/theming' as *;
+
+// Step 3 "Selected Mediums" chips — prominent chips with icon prefix
+$selected-medium-chip-theme: chip-theme(
+  $schema: $light-indigo-schema,
+  $background: var(--ig-secondary-600),
+  $text-color: #ffffff,
+  $border-color: transparent,
+  $hover-background: var(--ig-secondary-700),
+  $hover-text-color: #ffffff,
+  $hover-border-color: transparent
+);
+
 :host {
   display: block;
   width: 100%;
@@ -295,4 +308,9 @@
     align-items: center;
     gap: 6px;
   }
+}
+
+// Step 3 chips-area: apply secondary-palette theme to selected medium chips
+igx-chips-area igx-chip {
+  @include tokens($selected-medium-chip-theme);
 }

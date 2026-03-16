@@ -5,6 +5,7 @@ import { IgxIconComponent } from 'igniteui-angular/icon';
 import { IgxButtonDirective, IgxRippleDirective } from 'igniteui-angular/directives';
 import { IgxBadgeComponent } from 'igniteui-angular/badge';
 import { IGX_LIST_DIRECTIVES } from 'igniteui-angular/list';
+import { IgxChipComponent } from 'igniteui-angular/chips';
 import { ContentService } from '../../services/content.service';
 import {
   ProductArea,
@@ -30,6 +31,7 @@ import {
     IgxRippleDirective,
     IgxBadgeComponent,
     IGX_LIST_DIRECTIVES,
+    IgxChipComponent,
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
