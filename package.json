@@ -35,6 +35,7 @@
     "express": "^5.1.0",
     "igniteui-angular": "^21.1.1",
     "igniteui-angular-charts": "^21.0.0",
+    "igniteui-webcomponents": "^7.0.1",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },

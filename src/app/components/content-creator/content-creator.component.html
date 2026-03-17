@@ -311,10 +311,67 @@
         </div>
       </igx-step>
 
-      <!-- ==================== STEP 4: Review & Edit ==================== -->
+      <!-- ==================== STEP 4: Refine with Chat ==================== -->
+      <igx-step [completed]="allGenerated()">
+        <div igxStepTitle>Refine</div>
+        <div igxStepSubtitle>Chat to refine content</div>
+        <div igxStepContent>
+          <div class="step-content">
+            <h2 class="step-heading">Refine Content with AI</h2>
+            <p class="step-description">
+              Chat with the AI to iterate on the generated content. Ask for tone changes, structural edits, or
+              reformatting for any channel. The content preview updates in real time.
+            </p>
+
+            <div class="chat-refine-layout">
+              <!-- Chat panel -->
+              <div class="chat-panel">
+                <igx-chat
+                  [messages]="state().chatMessages"
+                  [draftMessage]="chatDraftMessage()"
+                  [options]="chatOptions()"
+                  (messageCreated)="onChatMessageCreated($event)"
+                  aria-label="AI content refinement chat">
+                </igx-chat>
+              </div>
+
+              <!-- Content preview panel -->
+              <div class="content-preview-panel" aria-label="Generated content preview">
+                <h3 class="preview-heading">Current Content</h3>
+                <igx-tabs>
+                  @for (medium of state().mediums; track medium) {
+                    <igx-tab-item>
+                      <igx-tab-header>
+                        <igx-icon igxTabHeaderIcon aria-hidden="true">{{ getMediumIcon(medium) }}</igx-icon>
+                        <span igxTabHeaderLabel>{{ getMediumLabel(medium) }}</span>
+                      </igx-tab-header>
+                      <igx-tab-content>
+                        <div class="content-preview-text" [attr.aria-label]="getMediumLabel(medium) + ' content preview'">{{ state().finalContent[medium] ?? '' }}</div>
+                      </igx-tab-content>
+                    </igx-tab-item>
+                  }
+                </igx-tabs>
+              </div>
+            </div>
+
+            <div class="step-actions">
+              <button igxButton="flat" igxRipple (click)="prevStep()" [disabled]="isChatRefining()">
+                <igx-icon>arrow_back</igx-icon>
+                Back
+              </button>
+              <button igxButton="contained" igxRipple (click)="nextStep()" [disabled]="!allGenerated() || isChatRefining()">
+                Proceed to Review
+                <igx-icon>arrow_forward</igx-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+      </igx-step>
+
+      <!-- ==================== STEP 5: Review & Edit ==================== -->
       <igx-step [completed]="step4Valid()">
         <div igxStepTitle>Review</div>
-        <div igxStepSubtitle>Vet & refine content</div>
+        <div igxStepSubtitle>Final edits per medium</div>
         <div igxStepContent>
           <div class="step-content">
             <h2 class="step-heading">Review & Edit Generated Content</h2>
@@ -347,6 +404,106 @@
                 Back
               </button>
               <button igxButton="contained" igxRipple (click)="nextStep()" [disabled]="!step4Valid()">
+                Assign Reviewers
+                <igx-icon>arrow_forward</igx-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+      </igx-step>
+
+      <!-- ==================== STEP 6: Assign Reviewers ==================== -->
+      <igx-step>
+        <div igxStepTitle>Reviewers</div>
+        <div igxStepSubtitle>Assign for approval</div>
+        <div igxStepContent>
+          <div class="step-content">
+            <h2 class="step-heading">Assign Content Reviewers</h2>
+            <p class="step-description">
+              Optionally assign team members to review the content before it goes live.
+              Reviewers will be notified with the details and your note.
+            </p>
+
+            <!-- Add reviewer form -->
+            <section class="form-section" aria-labelledby="add-reviewer-label">
+              <h3 id="add-reviewer-label" class="form-section-label">Add Reviewer</h3>
+              <div class="reviewer-form">
+                <igx-input-group type="border">
+                  <label igxLabel for="reviewer-name">Name *</label>
+                  <input
+                    id="reviewer-name"
+                    igxInput
+                    name="reviewerName"
+                    [ngModel]="reviewerNameInput()"
+                    (ngModelChange)="reviewerNameInput.set($event)"
+                    placeholder="e.g. Jane Smith"
+                    aria-required="true" />
+                </igx-input-group>
+                <igx-input-group type="border">
+                  <igx-prefix><igx-icon aria-hidden="true">email</igx-icon></igx-prefix>
+                  <label igxLabel for="reviewer-email">Email</label>
+                  <input
+                    id="reviewer-email"
+                    igxInput
+                    type="email"
+                    name="reviewerEmail"
+                    [ngModel]="reviewerEmailInput()"
+                    (ngModelChange)="reviewerEmailInput.set($event)"
+                    placeholder="e.g. jane@company.com" />
+                </igx-input-group>
+                <button
+                  igxButton="contained"
+                  igxRipple
+                  type="button"
+                  [disabled]="!reviewerNameInput().trim()"
+                  (click)="addReviewer()"
+                  aria-label="Add reviewer to list">
+                  <igx-icon>person_add</igx-icon>
+                  Add
+                </button>
+              </div>
+            </section>
+
+            <!-- Reviewer list -->
+            @if (state().reviewers.length > 0) {
+              <section class="form-section" aria-labelledby="reviewers-list-label">
+                <h3 id="reviewers-list-label" class="form-section-label">
+                  <igx-icon aria-hidden="true">group</igx-icon>
+                  Assigned Reviewers ({{ state().reviewers.length }})
+                </h3>
+                <igx-chips-area class="reviewer-chips" aria-label="List of assigned reviewers">
+                  @for (reviewer of state().reviewers; track reviewer.id) {
+                    <igx-chip [removable]="true" (remove)="removeReviewer(reviewer.id)" [attr.aria-label]="'Remove reviewer ' + reviewer.name">
+                      <igx-icon igxPrefix aria-hidden="true">person</igx-icon>
+                      {{ reviewer.name }}{{ reviewer.email ? ' · ' + reviewer.email : '' }}
+                    </igx-chip>
+                  }
+                </igx-chips-area>
+              </section>
+            }
+
+            <!-- Review note -->
+            <section class="form-section">
+              <h3 class="form-section-label">Note to Reviewers (optional)</h3>
+              <igx-input-group type="border" class="full-width">
+                <label igxLabel for="review-note">Message for reviewers</label>
+                <textarea
+                  id="review-note"
+                  igxInput
+                  name="reviewNote"
+                  rows="3"
+                  [ngModel]="state().reviewNote"
+                  (ngModelChange)="updateReviewNote($event)"
+                  placeholder="e.g. Please focus on tone and brand voice. Target audience is enterprise developers."></textarea>
+              </igx-input-group>
+            </section>
+
+            <div class="step-actions">
+              <button igxButton="flat" igxRipple (click)="prevStep()">
+                <igx-icon>arrow_back</igx-icon>
+                Back
+              </button>
+              <button igxButton="contained" igxRipple (click)="nextStep()">
                 Publishing Options
                 <igx-icon>arrow_forward</igx-icon>
               </button>
@@ -355,7 +512,7 @@
         </div>
       </igx-step>
 
-      <!-- ==================== STEP 5: Publish ==================== -->
+      <!-- ==================== STEP 7: Publish ==================== -->
       <igx-step>
         <div igxStepTitle>Publish</div>
         <div igxStepSubtitle>Schedule or post now</div>
@@ -389,6 +546,19 @@
                   }
                 </span>
               </div>
+              @if (state().reviewers.length > 0) {
+                <div class="summary-row">
+                  <span class="summary-key">Reviewers</span>
+                  <div class="summary-val mediums-summary">
+                    @for (reviewer of state().reviewers; track reviewer.id) {
+                      <igx-chip [removable]="false" [selectable]="false">
+                        <igx-icon igxPrefix aria-hidden="true">person</igx-icon>
+                        {{ reviewer.name }}
+                      </igx-chip>
+                    }
+                  </div>
+                </div>
+              }
             </section>
 
             <!-- Publish options -->

@@ -14,14 +14,14 @@ $selected-medium-chip-theme: chip-theme(
 :host {
   display: block;
   width: 100%;
-  max-width: 960px;
+  max-width: 1280px;
   margin: 0 auto;
 }
 
 .page-header {
   display: flex;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 12px;
 
   .page-header-left {
     display: flex;
@@ -30,7 +30,7 @@ $selected-medium-chip-theme: chip-theme(
 
     h1 {
       margin: 0;
-      font-size: 1.75rem;
+      font-size: 1.25rem;
       font-weight: 600;
       color: var(--ig-gray-900);
     }
@@ -38,30 +38,48 @@ $selected-medium-chip-theme: chip-theme(
 }
 
 .creator-layout {
+  // Compact step headers via the official IgxSize system (MCP: set_size stepper → small)
   igx-stepper {
     background: transparent;
+    --ig-size: 1;
+  }
+
+  // Typography: step title/subtitle are driven by stepper-typography() which emits
+  // font-size: var(--ig-body-2-font-size) and font-size: var(--ig-caption-font-size)
+  // respectively. Downshift each one type-scale category to compact the step headers.
+  ::ng-deep {
+    .igx-stepper__step-title {
+      font-size: var(--ig-caption-font-size);
+      line-height: var(--ig-caption-line-height);
+    }
+
+    .igx-stepper__step-subtitle {
+      font-size: var(--ig-overline-font-size);
+      line-height: var(--ig-overline-line-height);
+    }
   }
 }
 
 .step-content {
-  padding: 24px 0 16px;
+  padding: 16px 0 8px;
 }
 
 .step-heading {
-  font-size: 1.4rem;
+  font-size: 1.15rem;
   font-weight: 600;
   color: var(--ig-gray-800);
-  margin: 0 0 8px;
+  margin: 0 0 6px;
 }
 
 .step-description {
+  font-size: 0.875rem;
   color: var(--ig-gray-600);
-  margin: 0 0 24px;
+  margin: 0 0 16px;
   line-height: 1.5;
 }
 
 .form-section {
-  margin-bottom: 28px;
+  margin-bottom: 20px;
 }
 
 .form-section-label {
@@ -313,4 +331,143 @@ $selected-medium-chip-theme: chip-theme(
 // Step 3 chips-area: apply secondary-palette theme to selected medium chips
 igx-chips-area igx-chip {
   @include tokens($selected-medium-chip-theme);
+}
+
+/* ==================== Chat Refine Step ==================== */
+.chat-refine-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  // Fill most of the available viewport height minus page-header + stepper + step-actions
+  height: calc(100vh - 260px);
+  min-height: 480px;
+  max-height: 800px;
+
+  @media (max-width: 720px) {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+}
+
+.chat-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+
+  igx-chat {
+    flex: 1;
+    display: block;
+    height: 100%;
+    min-height: 0;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--ig-gray-200);
+  }
+
+  // Typography: no theme tokens exist for sizing — target CSS parts to pierce shadow DOM
+  ::ng-deep igc-chat {
+    // Base cascade root: sets the rem context for all shadow-DOM text that inherits
+    font-size: 0.875rem;
+
+    // Header title — slightly bolder to act as a panel label, same size as form-section-label
+    &::part(header) {
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+
+    // Message bubbles — match app body text scale
+    &::part(message-container) {
+      font-size: 0.875rem;
+    }
+
+    // Each message row wrapper — sets line-height & size for timestamp / sender text
+    &::part(message-item) {
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+
+    // Input area — match form input text scale
+    &::part(input-area-container) {
+      font-size: 0.875rem;
+    }
+  }
+}
+
+.content-preview-panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+
+  .preview-heading {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--ig-gray-700);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 6px;
+    flex-shrink: 0;
+  }
+
+  // Compact tab headers (MCP: set_size tabs → small) + BEM font overrides
+  igx-tabs {
+    --ig-size: 1;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  // Typography: tabs-typography() emits font-size: var(--ig-button-font-size) (14px
+  // uppercase) on the label. Downshift to 'caption' scale to match the indigo
+  // schema intent; also clear the 'button' category's text-transform: uppercase.
+  ::ng-deep {
+    .igx-tabs__header-item-inner igx-icon {
+      font-size: var(--ig-body-2-font-size);
+      width: var(--ig-body-2-font-size);
+      height: var(--ig-body-2-font-size);
+    }
+
+    .igx-tabs__header-item-inner > [igxtabheaderlabel] {
+      font-size: var(--ig-caption-font-size);
+      line-height: var(--ig-caption-line-height);
+      text-transform: var(--ig-caption-text-transform);
+    }
+  }
+}
+
+.content-preview-text {
+  font-size: 0.8rem;
+  color: var(--ig-gray-700);
+  line-height: 1.6;
+  white-space: pre-wrap;
+  padding: 12px;
+  // Grow with the available chat height rather than a fixed cap
+  height: calc(100vh - 400px);
+  min-height: 200px;
+  max-height: 700px;
+  overflow-y: auto;
+  background: var(--ig-gray-50, #fafafa);
+  border-radius: 6px;
+  border: 1px solid var(--ig-gray-200);
+  margin-top: 8px;
+}
+
+/* ==================== Reviewer Assignment Step ==================== */
+.reviewer-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 12px;
+  align-items: flex-end;
+  margin-bottom: 8px;
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.reviewer-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }

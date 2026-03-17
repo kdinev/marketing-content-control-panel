@@ -8,6 +8,11 @@
     "igniteui-theming": {
       "command": "npx",
       "args": ["-y", "igniteui-theming", "igniteui-theming-mcp"]
+    },
+    "igniteui-cli-mcp": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["C:/GitHub/igniteui-cli/packages/igniteui-mcp/igniteui-doc-mcp/dist/index.js", "--local"]
     }
   }
 }

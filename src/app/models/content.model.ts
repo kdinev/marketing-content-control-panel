@@ -16,6 +16,19 @@ export interface ContentAnalytics {
   engagementRate: number;
 }
 
+export interface ReviewerAssignment {
+  id: string;
+  name: string;
+  email: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  text: string;
+  sender: string;
+  timestamp: string;
+}
+
 export interface ContentItem {
   id: string;
   title: string;
@@ -32,6 +45,8 @@ export interface ContentItem {
   analytics?: ContentAnalytics;
   ragContext?: string;
   prompt?: string;
+  reviewers?: ReviewerAssignment[];
+  reviewNote?: string;
 }
 
 export interface ProductAreaStats {
@@ -71,6 +86,9 @@ export interface ContentCreationState {
   finalContent: Record<ContentMedium, string>;
   scheduleDate: string | null;
   publishImmediately: boolean;
+  chatMessages: ChatMessage[];
+  reviewers: ReviewerAssignment[];
+  reviewNote: string;
 }
 
 export const PRODUCT_AREA_LABELS: Record<ProductArea, string> = {

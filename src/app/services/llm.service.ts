@@ -159,6 +159,85 @@ export class LlmService {
     return templates[medium](prompt);
   }
 
+  refineContent(
+    userMessage: string,
+    currentContent: Record<string, string>,
+    model: LlmModel,
+    mediums: ContentMedium[]
+  ): Observable<{ reply: string; updatedContent: Record<ContentMedium, string> }> {
+    const provider = this.getProvider(model);
+    const key = this.getKey(provider);
+
+    if (!key) {
+      return of(this.buildMockRefinement(userMessage, currentContent as Record<ContentMedium, string>, mediums));
+    }
+
+    const contentBlock = mediums
+      .map((m) => `[${m}]:\n${currentContent[m] ?? ''}`)
+      .join('\n\n---\n\n');
+    const systemPrompt =
+      `You are a marketing content editor refining multi-channel marketing content.\n\n` +
+      `Current content by channel:\n${contentBlock}\n\n` +
+      `Instructions:\n` +
+      `1. Respond conversationally in 1-2 sentences explaining what you changed.\n` +
+      `2. Provide updated content for each changed channel using EXACTLY this format:\n` +
+      `---UPDATED:channelname---\n[updated content]\n---END---\n` +
+      `Only include channels that were actually changed. Valid channel names: blog, forum, facebook, linkedin, twitter.`;
+
+    return this.callApi(provider, model, key, systemPrompt, userMessage).pipe(
+      map((raw) =>
+        this.parseRefinementResponse(raw, currentContent as Record<ContentMedium, string>, mediums)
+      ),
+      catchError(() =>
+        of(this.buildMockRefinement(userMessage, currentContent as Record<ContentMedium, string>, mediums))
+      )
+    );
+  }
+
+  private parseRefinementResponse(
+    raw: string,
+    currentContent: Record<ContentMedium, string>,
+    mediums: ContentMedium[]
+  ): { reply: string; updatedContent: Record<ContentMedium, string> } {
+    const updatedContent: Record<ContentMedium, string> = { ...currentContent } as Record<ContentMedium, string>;
+    const firstMarker = raw.indexOf('---UPDATED:');
+    const reply = firstMarker > 0 ? raw.substring(0, firstMarker).trim() : raw.trim();
+    const sectionRegex = /---UPDATED:(\w+)---\n([\s\S]*?)(?=\n---UPDATED:|\n---END---|$)/g;
+    let match: RegExpExecArray | null;
+    while ((match = sectionRegex.exec(raw)) !== null) {
+      const medium = match[1] as ContentMedium;
+      if (mediums.includes(medium)) {
+        updatedContent[medium] = match[2].trim();
+      }
+    }
+    return { reply: reply || 'Content updated based on your request.', updatedContent };
+  }
+
+  private buildMockRefinement(
+    userMessage: string,
+    currentContent: Record<ContentMedium, string>,
+    mediums: ContentMedium[]
+  ): { reply: string; updatedContent: Record<ContentMedium, string> } {
+    const lower = userMessage.toLowerCase();
+    const mentioned = mediums.filter(
+      (m) => lower.includes(m) || lower.includes(MEDIUM_LABELS[m].toLowerCase())
+    );
+    const targets = mentioned.length > 0 ? mentioned : mediums;
+    const updatedContent: Record<ContentMedium, string> = { ...currentContent } as Record<ContentMedium, string>;
+    const note = `\n\n*[Refined: ${userMessage.substring(0, 60)}${userMessage.length > 60 ? '...' : ''}]*`;
+    for (const m of targets) {
+      if (currentContent[m]) {
+        updatedContent[m] = currentContent[m] + note;
+      }
+    }
+    const changedStr = targets.map((m) => MEDIUM_LABELS[m]).join(', ');
+    const shortMsg = userMessage.substring(0, 50) + (userMessage.length > 50 ? '...' : '');
+    return {
+      reply: `I've updated the content for ${changedStr} based on your request: "${shortMsg}". Feel free to ask for further refinements, or proceed to review when you're satisfied.`,
+      updatedContent,
+    };
+  }
+
   private extractTitle(prompt: string): string {
     const first = prompt.split('.')[0].split('\n')[0];
     return first.length > 60 ? first.substring(0, 60) + '...' : first;

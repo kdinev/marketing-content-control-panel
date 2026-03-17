@@ -11,6 +11,8 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
 import { IgxStepperComponent, IGX_STEPPER_DIRECTIVES } from 'igniteui-angular/stepper';
+import { IGX_TABS_DIRECTIVES } from 'igniteui-angular/tabs';
+import { IgxChatComponent, type IgxChatOptions } from 'igniteui-angular/chat';
 import { IGX_INPUT_GROUP_DIRECTIVES } from 'igniteui-angular/input-group';
 import { IgxIconComponent } from 'igniteui-angular/icon';
 import { IgxButtonDirective, IgxRippleDirective, IgxIconButtonDirective } from 'igniteui-angular/directives';
@@ -28,6 +30,7 @@ import {
   ContentMedium,
   LlmModel,
   ContentCreationState,
+  ReviewerAssignment,
   PRODUCT_AREA_LABELS,
   PRODUCT_AREA_ICONS,
   PRODUCT_AREA_RAG_TYPE,
@@ -58,6 +61,8 @@ import {
     IgxDatePickerComponent,
     IgxLinearProgressBarComponent,
     IGX_BUTTON_GROUP_DIRECTIVES,
+    IGX_TABS_DIRECTIVES,
+    IgxChatComponent,
   ],
   templateUrl: './content-creator.component.html',
   styleUrl: './content-creator.component.scss',
@@ -91,6 +96,9 @@ export class ContentCreatorComponent {
     finalContent: {} as Record<ContentMedium, string>,
     scheduleDate: null,
     publishImmediately: true,
+    chatMessages: [],
+    reviewers: [],
+    reviewNote: '',
   });
 
   readonly currentStep = signal(0);
@@ -105,6 +113,10 @@ export class ContentCreatorComponent {
   readonly googleKeyInput = signal('');
   readonly today = new Date();
   readonly scheduleDate = signal<Date | null>(null);
+  readonly isChatRefining = signal(false);
+  readonly chatDraftMessage = signal<{ text: string }>({ text: '' });
+  readonly reviewerNameInput = signal('');
+  readonly reviewerEmailInput = signal('');
 
   // Derived
   readonly productAreas: ProductArea[] = ['dev-tools', 'reveal', 'slingshot'];
@@ -130,6 +142,14 @@ export class ContentCreatorComponent {
     const s = this.state();
     return s.mediums.every((m) => (s.finalContent[m] ?? '').trim().length > 0);
   });
+
+  readonly chatOptions = computed<IgxChatOptions>(() => ({
+    currentUserId: 'user',
+    headerText: 'AI Content Refinement',
+    inputPlaceholder: 'Ask to refine the content...',
+    isTyping: this.isChatRefining(),
+    disableInputAttachments: true,
+  }));
 
   readonly generatedMediums = computed(() => Object.keys(this.state().finalContent) as ContentMedium[]);
 
@@ -284,6 +304,22 @@ export class ContentCreatorComponent {
 
     this.isGenerating.set(false);
     this.generatingMedium.set(null);
+
+    // Initialise the chat with a welcome message for the Refine step
+    const mediumNames = this.state().mediums.map((m) => MEDIUM_LABELS[m]).join(', ');
+    const welcomeMsg = {
+      id: 'ai-welcome',
+      text:
+        `I've generated content for ${mediumNames}. ` +
+        `Ask me to refine any piece — for example: "Make the Twitter post punchier", ` +
+        `"Add more technical depth to the blog post", or "Make all content more formal". ` +
+        `When you're happy, click **Proceed to Review**.`,
+      sender: 'ai',
+      timestamp: Date.now().toString(),
+    };
+    this.state.update((st) => ({ ...st, chatMessages: [welcomeMsg] }));
+    this.chatDraftMessage.set({ text: '' });
+
     this.stepper().next();
     this.currentStep.set(3);
   }
@@ -297,6 +333,77 @@ export class ContentCreatorComponent {
   prevStep(): void {
     this.stepper().prev();
     this.currentStep.update((s) => Math.max(0, s - 1));
+  }
+
+  // Chat refinement (Step 4)
+  onChatMessageCreated(msg: { id: string; text: string; sender?: string; timestamp?: string }): void {
+    const userMsg = {
+      id: msg.id,
+      text: msg.text,
+      sender: 'user',
+      timestamp: msg.timestamp ?? Date.now().toString(),
+    };
+    this.state.update((st) => ({ ...st, chatMessages: [...st.chatMessages, userMsg] }));
+    this.chatDraftMessage.set({ text: '' });
+    this.isChatRefining.set(true);
+
+    const s = this.state();
+    this.llmService
+      .refineContent(msg.text, s.finalContent, s.model!, s.mediums)
+      .subscribe({
+        next: ({ reply, updatedContent }) => {
+          const aiMsg = {
+            id: `ai-${Date.now()}`,
+            text: reply,
+            sender: 'ai',
+            timestamp: Date.now().toString(),
+          };
+          this.state.update((st) => ({
+            ...st,
+            finalContent: updatedContent,
+            chatMessages: [...st.chatMessages, aiMsg],
+          }));
+          this.isChatRefining.set(false);
+        },
+        error: () => {
+          const errMsg = {
+            id: `ai-err-${Date.now()}`,
+            text: 'Sorry, I had trouble processing that. Please try again.',
+            sender: 'ai',
+            timestamp: Date.now().toString(),
+          };
+          this.state.update((st) => ({
+            ...st,
+            chatMessages: [...st.chatMessages, errMsg],
+          }));
+          this.isChatRefining.set(false);
+        },
+      });
+  }
+
+  // Reviewer assignment (Step 6)
+  addReviewer(): void {
+    const name = this.reviewerNameInput().trim();
+    if (!name) return;
+    const reviewer: ReviewerAssignment = {
+      id: crypto.randomUUID(),
+      name,
+      email: this.reviewerEmailInput().trim(),
+    };
+    this.state.update((st) => ({ ...st, reviewers: [...st.reviewers, reviewer] }));
+    this.reviewerNameInput.set('');
+    this.reviewerEmailInput.set('');
+  }
+
+  removeReviewer(id: string): void {
+    this.state.update((st) => ({
+      ...st,
+      reviewers: st.reviewers.filter((r) => r.id !== id),
+    }));
+  }
+
+  updateReviewNote(val: string): void {
+    this.state.update((st) => ({ ...st, reviewNote: val }));
   }
 
   // Final submit
@@ -323,6 +430,8 @@ export class ContentCreatorComponent {
         : undefined,
       ragContext: s.ragContext,
       prompt: s.prompt,
+      reviewers: s.reviewers.length > 0 ? s.reviewers : undefined,
+      reviewNote: s.reviewNote.trim() || undefined,
     });
 
     this.showSnackbar(
