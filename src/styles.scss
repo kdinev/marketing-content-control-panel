@@ -1,4 +1,4 @@
-@use 'igniteui-angular/theming' as *;
+@use '@infragistics/igniteui-angular/theming' as *;
 
 // ── Infragistics Brand Theme ────────────────────────────────────────────────
 // Palette: navy primary (#003F7C) + orange secondary (#F05A28)
@@ -130,6 +130,7 @@ $medium-chip-theme: chip-theme(
   $background: var(--ig-primary-600),
   $text-color: #ffffff,
   $border-color: transparent,
+  $border-radius: 12px,
   $hover-background: var(--ig-primary-700),
   $hover-text-color: #ffffff,
   $hover-border-color: transparent
@@ -138,6 +139,17 @@ $medium-chip-theme: chip-theme(
 igx-chip.medium-chip {
   --ig-size: 1; // small
   @include tokens($medium-chip-theme);
+
+  .igx-chip__item {
+    padding: 2px 10px;
+  }
+
+  .igx-chip__label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
 }
 
 // Area tag chips (Reveal, Dev Tools, Slingshot) — light orange, dark text
@@ -146,6 +158,7 @@ $area-chip-theme: chip-theme(
   $background: var(--ig-secondary-100),
   $text-color: var(--ig-secondary-800),
   $border-color: var(--ig-secondary-300),
+  $border-radius: 12px,
   $hover-background: var(--ig-secondary-200),
   $hover-text-color: var(--ig-secondary-900),
   $hover-border-color: var(--ig-secondary-400)
@@ -154,6 +167,17 @@ $area-chip-theme: chip-theme(
 igx-chip.area-chip {
   --ig-size: 1; // small
   @include tokens($area-chip-theme);
+
+  .igx-chip__item {
+    padding: 2px 10px;
+  }
+
+  .igx-chip__label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
 }
 
 .section-title {

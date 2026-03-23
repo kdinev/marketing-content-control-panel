@@ -1,14 +1,14 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, CUSTOM_ELEMENTS_SCHEMA, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgTemplateOutlet } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
-import { IgxCardComponent, IgxCardHeaderComponent, IgxCardContentDirective, IgxCardHeaderTitleDirective, IgxCardHeaderSubtitleDirective } from 'igniteui-angular/card';
-import { IgxIconComponent } from 'igniteui-angular/icon';
-import { IgxButtonDirective, IgxRippleDirective, IgxIconButtonDirective } from 'igniteui-angular/directives';
-import { IGX_TABS_DIRECTIVES } from 'igniteui-angular/tabs';
-import { IGX_LIST_DIRECTIVES } from 'igniteui-angular/list';
-import { IgxChipComponent } from 'igniteui-angular/chips';
+import { IgxCardComponent, IgxCardContentDirective } from '@infragistics/igniteui-angular/card';
+import { IgxIconComponent } from '@infragistics/igniteui-angular/icon';
+import { IgxButtonDirective, IgxRippleDirective, IgxIconButtonDirective } from '@infragistics/igniteui-angular/directives';
+import { IGX_TABS_DIRECTIVES } from '@infragistics/igniteui-angular/tabs';
+import { IGX_LIST_DIRECTIVES } from '@infragistics/igniteui-angular/list';
+import { IgxChipComponent } from '@infragistics/igniteui-angular/chips';
 import { IgxCategoryChartModule } from 'igniteui-angular-charts';
 import { ContentService } from '../../services/content.service';
 import {
@@ -20,16 +20,16 @@ import {
   PRODUCT_AREA_ICONS,
   MEDIUM_LABELS,
 } from '../../models/content.model';
+import { IgcDockManagerLayout, IgcDockManagerPaneType, IgcSplitPaneOrientation } from '@infragistics/igniteui-dockmanager';
+
+const LAYOUT_STORAGE_KEY = 'product-area-dock-layout';
 
 @Component({
   selector: 'app-product-area',
   imports: [
     NgTemplateOutlet,
     IgxCardComponent,
-    IgxCardHeaderComponent,
     IgxCardContentDirective,
-    IgxCardHeaderTitleDirective,
-    IgxCardHeaderSubtitleDirective,
     IgxIconComponent,
     IgxButtonDirective,
     IgxIconButtonDirective,
@@ -42,6 +42,7 @@ import {
   templateUrl: './product-area.component.html',
   styleUrl: './product-area.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class ProductAreaComponent {
   private readonly route = inject(ActivatedRoute);
@@ -99,6 +100,82 @@ export class ProductAreaComponent {
   readonly topContentRanking = computed(() =>
     [...this.publishedContent()].slice(0, 5)
   );
+
+  private static readonly DEFAULT_LAYOUT: IgcDockManagerLayout = {
+    rootPane: {
+      type: IgcDockManagerPaneType.splitPane,
+      orientation: IgcSplitPaneOrientation.vertical,
+      panes: [
+        {
+          type: IgcDockManagerPaneType.contentPane,
+          contentId: 'kpiRow',
+          header: 'Area KPIs',
+          allowClose: false,
+          size: 120,
+        },
+        {
+          type: IgcDockManagerPaneType.splitPane,
+          orientation: IgcSplitPaneOrientation.horizontal,
+          size: 320,
+          panes: [
+            {
+              type: IgcDockManagerPaneType.contentPane,
+              contentId: 'impressionsChart',
+              header: 'Impressions Over Time',
+              allowClose: false,
+            },
+            {
+              type: IgcDockManagerPaneType.contentPane,
+              contentId: 'engagementChart',
+              header: 'Reactions by Medium',
+              allowClose: false,
+            },
+          ],
+        },
+        {
+          type: IgcDockManagerPaneType.splitPane,
+          orientation: IgcSplitPaneOrientation.horizontal,
+          panes: [
+            {
+              type: IgcDockManagerPaneType.contentPane,
+              contentId: 'topContent',
+              header: 'Top Performing Content',
+              allowClose: false,
+            },
+            {
+              type: IgcDockManagerPaneType.contentPane,
+              contentId: 'contentList',
+              header: 'Content List',
+              allowClose: false,
+            },
+          ],
+        },
+      ],
+    },
+    floatingPanes: [],
+  };
+
+  readonly layout = signal<IgcDockManagerLayout>(ProductAreaComponent.loadSavedLayout());
+
+  private static loadSavedLayout(): IgcDockManagerLayout {
+    try {
+      const saved = localStorage.getItem(LAYOUT_STORAGE_KEY);
+      if (saved) return JSON.parse(saved) as IgcDockManagerLayout;
+    } catch {
+      // ignore parse errors, fall through to default
+    }
+    return structuredClone(ProductAreaComponent.DEFAULT_LAYOUT);
+  }
+
+  onLayoutChange(event: Event): void {
+    const el = event.target as HTMLElement & { layout: IgcDockManagerLayout };
+    localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(el.layout));
+  }
+
+  resetLayout(): void {
+    localStorage.removeItem(LAYOUT_STORAGE_KEY);
+    this.layout.set(structuredClone(ProductAreaComponent.DEFAULT_LAYOUT));
+  }
 
   getMediumLabel(medium: ContentMedium): string {
     return MEDIUM_LABELS[medium];

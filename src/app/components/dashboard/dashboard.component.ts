@@ -1,11 +1,10 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, CUSTOM_ELEMENTS_SCHEMA, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { IgxCardComponent, IgxCardHeaderComponent, IgxCardContentDirective, IgxCardActionsComponent, IgxCardHeaderTitleDirective, IgxCardHeaderSubtitleDirective } from 'igniteui-angular/card';
-import { IgxIconComponent } from 'igniteui-angular/icon';
-import { IgxButtonDirective, IgxRippleDirective } from 'igniteui-angular/directives';
-import { IgxBadgeComponent } from 'igniteui-angular/badge';
-import { IGX_LIST_DIRECTIVES } from 'igniteui-angular/list';
-import { IgxChipComponent } from 'igniteui-angular/chips';
+import { IgxCardComponent, IgxCardHeaderComponent, IgxCardContentDirective, IgxCardActionsComponent, IgxCardHeaderTitleDirective, IgxCardHeaderSubtitleDirective } from '@infragistics/igniteui-angular/card';
+import { IgxIconComponent } from '@infragistics/igniteui-angular/icon';
+import { IgxButtonDirective, IgxRippleDirective } from '@infragistics/igniteui-angular/directives';
+import { IGX_LIST_DIRECTIVES } from '@infragistics/igniteui-angular/list';
+import { IgxChipComponent } from '@infragistics/igniteui-angular/chips';
 import { ContentService } from '../../services/content.service';
 import {
   ProductArea,
@@ -16,6 +15,9 @@ import {
   ContentStatus,
   ContentMedium,
 } from '../../models/content.model';
+import { IgcDockManagerLayout, IgcDockManagerPaneType, IgcSplitPaneOrientation } from '@infragistics/igniteui-dockmanager';
+
+const LAYOUT_STORAGE_KEY = 'dashboard-dock-layout';
 
 @Component({
   selector: 'app-dashboard',
@@ -29,13 +31,13 @@ import {
     IgxIconComponent,
     IgxButtonDirective,
     IgxRippleDirective,
-    IgxBadgeComponent,
     IGX_LIST_DIRECTIVES,
     IgxChipComponent,
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })
 export class DashboardComponent {
   private readonly router = inject(Router);
@@ -65,6 +67,83 @@ export class DashboardComponent {
       .publishedItems()
       .reduce((s, i) => s + (i.analytics?.impressions ?? 0), 0)
   );
+
+  private static readonly DEFAULT_LAYOUT: IgcDockManagerLayout = {
+    rootPane: {
+      type: IgcDockManagerPaneType.splitPane,
+      orientation: IgcSplitPaneOrientation.vertical,
+      panes: [
+        {
+          type: IgcDockManagerPaneType.contentPane,
+          contentId: 'kpiRow',
+          header: 'KPI Overview',
+          allowClose: false,
+          size: 130,
+        },
+        {
+          type: IgcDockManagerPaneType.splitPane,
+          orientation: IgcSplitPaneOrientation.horizontal,
+          panes: [
+            {
+              type: IgcDockManagerPaneType.contentPane,
+              contentId: 'productAreas',
+              header: 'Product Areas',
+              allowClose: false,
+            },
+            {
+              type: IgcDockManagerPaneType.splitPane,
+              orientation: IgcSplitPaneOrientation.vertical,
+              size: 300,
+              panes: [
+                {
+                  type: IgcDockManagerPaneType.contentPane,
+                  contentId: 'scheduled',
+                  header: 'Scheduled',
+                  allowClose: false,
+                },
+                {
+                  type: IgcDockManagerPaneType.contentPane,
+                  contentId: 'pipeline',
+                  header: 'In Pipeline',
+                  allowClose: false,
+                },
+              ],
+            },
+          ],
+        },
+        {
+          type: IgcDockManagerPaneType.contentPane,
+          contentId: 'recentPublished',
+          header: 'Recent Published Content',
+          allowClose: false,
+          size: 260,
+        },
+      ],
+    },
+    floatingPanes: [],
+  };
+
+  readonly layout = signal<IgcDockManagerLayout>(DashboardComponent.loadSavedLayout());
+
+  private static loadSavedLayout(): IgcDockManagerLayout {
+    try {
+      const saved = localStorage.getItem(LAYOUT_STORAGE_KEY);
+      if (saved) return JSON.parse(saved) as IgcDockManagerLayout;
+    } catch {
+      // ignore parse errors, fall through to default
+    }
+    return structuredClone(DashboardComponent.DEFAULT_LAYOUT);
+  }
+
+  onLayoutChange(event: Event): void {
+    const el = event.target as HTMLElement & { layout: IgcDockManagerLayout };
+    localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(el.layout));
+  }
+
+  resetLayout(): void {
+    localStorage.removeItem(LAYOUT_STORAGE_KEY);
+    this.layout.set(structuredClone(DashboardComponent.DEFAULT_LAYOUT));
+  }
 
   getAreaLabel(area: ProductArea): string {
     return PRODUCT_AREA_LABELS[area];
