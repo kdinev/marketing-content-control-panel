@@ -6,9 +6,9 @@ import {
   IgxNavigationDrawerComponent,
   IgxNavDrawerItemDirective,
   IgxNavDrawerTemplateDirective,
-} from 'igniteui-angular/navigation-drawer';
-import { IgxIconComponent } from 'igniteui-angular/icon';
-import { IgxRippleDirective, IgxButtonDirective, IgxIconButtonDirective } from 'igniteui-angular/directives';
+} from '@infragistics/igniteui-angular/navigation-drawer';
+import { IgxIconComponent } from '@infragistics/igniteui-angular/icon';
+import { IgxRippleDirective, IgxButtonDirective, IgxIconButtonDirective } from '@infragistics/igniteui-angular/directives';
 import { map } from 'rxjs/operators';
 
 @Component({

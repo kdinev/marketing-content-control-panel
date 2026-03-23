@@ -1,4 +1,4 @@
-@use 'igniteui-angular/theming' as *;
+@use '@infragistics/igniteui-angular/theming' as *;
 
 // Compact, horizontal-label tabs theme scoped to this component
 $compact-tabs: tabs-theme(
@@ -14,8 +14,44 @@ $compact-tabs: tabs-theme(
   @include tokens($compact-tabs);
 }
 
+.product-area-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
 .product-area {
   width: 100%;
+}
+
+.dock-manager {
+  display: block;
+  height: calc(100vh - 64px - 48px - 72px);
+}
+
+/* Panel content wrapper inside each dock pane */
+.panel-content {
+  height: 100%;
+  box-sizing: border-box;
+  padding: 12px 16px;
+}
+
+.panel-scroll {
+  overflow-y: auto;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  flex-shrink: 0;
+
+  .page-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
 }
 
 .page-header-left {
@@ -47,7 +83,6 @@ $compact-tabs: tabs-theme(
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 16px;
-  margin-bottom: 32px;
 }
 
 .kpi-card {
